@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>周长面积小达人</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
+body{background:#eef6ff;padding:20px;}
+.game{max-width:450px;margin:0 auto;background:#fff;border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,0.1);overflow:hidden;}
+.header{background:#4299e1;color:white;padding:18px;text-align:center;}
+.header h1{font-size:22px;margin-bottom:6px}
+.info{display:flex;justify-content:space-between;padding:10px 20px;background:#f8fcff;}
+.info p{font-size:15px;color:#333}
+.main{padding:24px;position:relative}
+.shape{text-align:center;margin-bottom:20px}
+.shape-box{width:140px;height:140px;margin:0 auto;border:3px solid #4299e1;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f7fcff;position:relative}
+.square{width:100px;height:100px;border:2px solid #ff9800}
+.rect{width:120px;height:80px;border:2px solid #ff5722}
+.label{position:absolute;font-size:14px;color:#333}
+.question{font-size:18px;text-align:center;margin-bottom:20px;line-height:1.6}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.opt{padding:14px;border:none;border-radius:12px;background:#e8f3ff;font-size:16px;cursor:pointer;transition:0.2s}
+.opt:hover{background:#d0e8ff}
+.opt.correct{background:#a5e9cb}
+.opt.wrong{background:#ffcccc}
+.feedback{text-align:center;font-size:17px;font-weight:bold;height:24px;margin-bottom:10px}
+.next-btn{width:100%;padding:14px;background:#4299e1;color:white;border:none;border-radius:12px;font-size:16px;display:none}
+.formula-box{padding:16px;background:#fff5e6;border-radius:12px;margin-top:10px}
+.formula-box p{margin:4px 0;font-size:15px;color:#cc7722}
+.end{text-align:center;padding:30px;display:none}
+.end h2{font-size:22px;margin-bottom:10px}
+.end p{font-size:16px;margin-bottom:20px}
+.restart{padding:12px 24px;background:#4299e1;color:white;border:none;border-radius:12px}
+</style>
+</head>
+<body>
+<div class="game">
+  <div class="header">
+    <h1>🎮 周长面积小达人</h1>
+    <p>记住公式，闯关开始！</p>
+  </div>
+  <div class="info">
+    <p>得分：<span id="score">0</span></p>
+    <p>题目：<span id="num">1</span>/10</p>
+  </div>
+  <div class="main" id="main">
+    <div class="shape">
+      <div class="shape-box" id="shapeBox">
+        <div id="shape" class="square"></div>
+        <div class="label" id="label1">a=?</div>
+        <div class="label" id="label2" style="right:6px;top:50%">b=?</div>
+      </div>
+    </div>
+    <div class="question" id="q"></div>
+    <div class="options" id="opts"></div>
+    <div class="feedback" id="fb"></div>
+    <button class="next-btn" id="next">下一题 →</button>
+  </div>
+  <div class="formula-box">
+    <p>📘 正方形周长 = 边长 × 4</p>
+    <p>📘 正方形面积 = 边长 × 边长</p>
+    <p>📘 长方形周长 = (长+宽)×2</p>
+    <p>📘 长方形面积 = 长 × 宽</p>
+  </div>
+  <div class="end" id="end">
+    <h2>🎉 闯关完成！</h2>
+    <p>最终得分：<span id="final">0</span>/10</p>
+    <button class="restart" onclick="location.reload()">再来一次</button>
+  </div>
+</div>
+
+<script>
+const total = 10;
+let score = 0;
+let cur = 0;
+let ans = -1;
+
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+
+function makeQ(){
+  const isSquare = Math.random()>0.5;
+  const isZhou = Math.random()>0.5;
+  let a,b,correct,text;
+  if(isSquare){
+    a = rand(2,9);
+    if(isZhou){
+      correct = a*4;
+      text = `边长为 ${a} 的正方形，周长是？`;
+    }else{
+      correct = a*a;
+      text = `边长为 ${a} 的正方形，面积是？`;
+    }
+    document.getElementById('shape').className = 'square';
+    document.getElementById('label1').innerText = `a=${a}`;
+    document.getElementById('label2').style.display = 'none';
+  }else{
+    a = rand(3,10);
+    b = rand(2,7);
+    if(isZhou){
+      correct = 2*(a+b);
+      text = `长${a} 宽${b} 的长方形，周长是？`;
+    }else{
+      correct = a*b;
+      text = `长${a} 宽${b} 的长方形，面积是？`;
+    }
+    document.getElementById('shape').className = 'rect';
+    document.getElementById('label1').innerText = `a=${a}`;
+    document.getElementById('label2').style.display = 'block';
+    document.getElementById('label2').innerText = `b=${b}`;
+  }
+  const opts = new Set();
+  opts.add(correct);
+  while(opts.size<4){
+    let fake = correct + rand(-8,8);
+    if(fake>0 && fake!=correct) opts.add(fake);
+  }
+  const arr = [...opts].sort(()=>Math.random()-0.5);
+  ans = arr.indexOf(correct);
+  return {q:text,opts:arr};
+}
+
+function load(){
+  if(cur>=total){
+    document.getElementById('main').style.display='none';
+    document.getElementById('end').style.display='block';
+    document.getElementById('final').innerText=score;
+    return;
+  }
+  const {q,opts} = makeQ();
+  document.getElementById('q').innerText = q;
+  document.getElementById('num').innerText = cur+1;
+  const box = document.getElementById('opts');
+  box.innerHTML = '';
+  document.getElementById('fb').innerText = '';
+  document.getElementById('next').style.display = 'none';
+  opts.forEach((t,i)=>{
+    let b = document.createElement('button');
+    b.className = 'opt';
+    b.innerText = t;
+    b.onclick = ()=>check(i,b);
+    box.appendChild(b);
+  })
+}
+
+function check(i,b){
+  const all = document.querySelectorAll('.opt');
+  all.forEach(o=>o.disabled=true);
+  const fb = document.getElementById('fb');
+  if(i===ans){
+    b.classList.add('correct');
+    fb.innerText = '✅ 太棒了！正确！';
+    fb.style.color='#27ae60';
+    score++;
+    document.getElementById('score').innerText=score;
+  }else{
+    b.classList.add('wrong');
+    all[ans].classList.add('correct');
+    fb.innerText = '❌ 再看看公式哦';
+    fb.style.color='#e74c3c';
+  }
+  document.getElementById('next').style.display='block';
+}
+
+document.getElementById('next').onclick = ()=>{
+  cur++;
+  load();
+}
+
+load();
+</script>
+</body>
+</html>
