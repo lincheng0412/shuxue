@@ -14,7 +14,7 @@ body{background:#eef6ff;padding:20px;}
 .info p{font-size:15px;color:#333}
 .main{padding:24px;position:relative}
 .shape{text-align:center;margin-bottom:20px}
-.shape-box{width:140px;height:140px;margin:0 auto;border:3px solid #4299e1;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#f7fcff;position:relative}
+.shape-box{width:140px;height:140px;margin:0 auto;display:flex;align-items:center;justify-content:center;background:transparent;position:relative}
 .square{width:100px;height:100px;border:2px solid #ff9800}
 .rect{width:120px;height:80px;border:2px solid #ff5722}
 .label{position:absolute;font-size:14px;color:#333}
@@ -98,7 +98,6 @@ function makeQ(){
     document.getElementById('label2').style.display = 'none';
   }else{
     a = rand(3,10);
-    // 保证长≠宽，避免再出现“长=宽”的长方形
     do {
       b = rand(2,7);
     } while (b === a);
